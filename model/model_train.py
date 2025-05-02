@@ -1,8 +1,9 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 import joblib
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
+from sklearn.neural_network import MLPClassifier
 
 healthDataRaw = pd.read_csv('../data/cardio_train.csv')
 
@@ -24,51 +25,50 @@ rename_map = {
     'active (0 - does not exercise, 1 - exercises)':                         'physical_activity',
     'cardio (0 - no cardiovascular disease, 1 -has cardiovascular disease)': 'cardiovascular_disease'
 }
-healthData = healthDataRaw.rename(columns=rename_map)
-
-healthDataClean = healthData.copy()
+healthDataRenamed = healthDataRaw.rename(columns=rename_map)
 
 # removing entries with values less than 0 for blood pressure, pulse pressure and arterial pressure (medically impossible values)
-healthDataClean = healthDataClean[
-                        (healthDataClean['systolic_bp'] > 0) &
-                        (healthDataClean['diastolic_bp'] > 0) &
-                        (healthDataClean['pulse_pressure'] > 0) &
-                        (healthDataClean['mean_arterial_pressure'] > 0)
-]
+healthDataValid = healthDataRenamed[
+                        (healthDataRenamed['systolic_bp'] > 0) &
+                        (healthDataRenamed['diastolic_bp'] > 0) &
+                        (healthDataRenamed['pulse_pressure'] > 0) &
+                        (healthDataRenamed['mean_arterial_pressure'] > 0)
+].reset_index(drop=True) # reset index of dataframe as we removed some rows
 
-# reset index of dataframe as we removed some rows
-healthDataClean = healthDataClean.reset_index(drop=True)
-
-# define variable types
+# remove outliers for continuous features
 continuous_cols = ['age_years', 'height_m', 'weight_kg', 'body_mass_index', 'systolic_bp', 'diastolic_bp', 'mean_arterial_pressure', 'pulse_pressure']
-binary_cols = ['smoking_status', 'alcohol_consumption', 'physical_activity', 'gender']
-ordinal_cols = ['cholesterol_level', 'glucose_level']
-
-healthDataRemovedOutliers = healthDataClean.copy() #just in case we need healthDataClean dataframe
-
-# remove outliers for continuous variables
 for col in continuous_cols:
-    Q1 = healthDataClean[col].quantile(0.25)
-    Q3 = healthDataClean[col].quantile(0.75)
+    Q1 = healthDataValid[col].quantile(0.25)
+    Q3 = healthDataValid[col].quantile(0.75)
     IQR = Q3 - Q1
     lower = Q1 - 1.5 * IQR
     upper = Q3 + 1.5 * IQR
-    healthDataRemovedOutliers = healthDataRemovedOutliers[healthDataRemovedOutliers[col].between(lower, upper)]
+    healthDataValid = healthDataValid[healthDataValid[col].between(lower, upper)]
+healthDataRemovedOutliers = healthDataValid.reset_index(drop=True)
+
+# select age, bmi, sys_bp, dia_bp, cholesterol_level, glucose_level after dimensionality reduction and feature selection
+selected_cont_features = ['age_years', 'body_mass_index', 'systolic_bp', 'diastolic_bp',]
+selected_ord_features = ['cholesterol_level', 'glucose_level']
 
 # split into features(X) and target(y)
-X_df = healthDataRemovedOutliers[continuous_cols + binary_cols + ordinal_cols]
+# no need to train test split here as we want to train the model on the whole dataset to improve model performance in deployment
+X_df = healthDataRemovedOutliers[selected_cont_features + selected_ord_features]
 y = healthDataRemovedOutliers['cardiovascular_disease']
 
-# build the transformer: MinMaxScale continuous and binary variables, OneHotEncode ordinal columns
-preprocessor = ColumnTransformer(transformers=[
-    ('scale', MinMaxScaler(), continuous_cols + binary_cols),
-    ('ohe',   OneHotEncoder(drop='first', sparse_output=False), ordinal_cols), #drop='first' to avoid collinearity and remove redundancy, sparse=False makes the output a regular array
+# build the preprocessor that encodes cont features using MinMaxScaling and ordinary features with one-hot encoding
+preprocessor = ColumnTransformer([
+    ('scale', MinMaxScaler(), selected_cont_features),
+    ('ohe', OneHotEncoder(drop='first', sparse_output=False), selected_ord_features),
 ])
-X_array = preprocessor.fit_transform(X_df)
 
-# turn X_array back into a DataFrame with original names
-ohe_names = preprocessor.named_transformers_['ohe'].get_feature_names_out(ordinal_cols)
-all_feature_names = continuous_cols + binary_cols + list(ohe_names)
-df_encoded_features = pd.DataFrame(X_array, columns=all_feature_names, index=healthDataRemovedOutliers.index)
+# combine preprocessor with chosen model: Multi-Layer-Perceptron
+pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('model', MLPClassifier(hidden_layer_sizes=(100, ), max_iter=200)),
+])
 
-# Now df_encoded_features is the feature matrix and y is the target vector
+# fit the pipeline
+pipeline.fit(X_df, y)
+
+# save model for deployment
+joblib.dump(pipeline, 'pipeline.pkl')
