@@ -69,6 +69,6 @@ X_array = preprocessor.fit_transform(X_df)
 # turn X_array back into a DataFrame with original names
 ohe_names = preprocessor.named_transformers_['ohe'].get_feature_names_out(ordinal_cols)
 all_feature_names = continuous_cols + binary_cols + list(ohe_names)
-df_encoded_features = pd.DataFrame(X_array, columns=all_feature_names, index=healthDataClean.index)
+df_encoded_features = pd.DataFrame(X_array, columns=all_feature_names, index=healthDataRemovedOutliers.index)
 
 # Now df_encoded_features is the feature matrix and y is the target vector
