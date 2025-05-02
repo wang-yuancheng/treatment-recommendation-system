@@ -13,6 +13,13 @@
 
     <main>
         {% block content %}
+        <form method="POST" action="/predict">
+
+            <label>"Enter values (comma‐separated):"<br>
+            "age_years, body_mass_index, systolic_bp, diastolic_bp, cholesterol_cat (1–3), glucose_cat (1–3)"</label><br>
+            <input type="text" name="csv_input" placeholder="30,22.5,120,80,1,1"><br>
+            <button type="submit">Submit</button>
+        </form>
         {% endblock %}
     </main>
 
