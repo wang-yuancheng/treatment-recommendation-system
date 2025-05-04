@@ -25,7 +25,7 @@ This is a binary classification problem where the target variable is `cardio` (1
 [Cardiovascular Disease Dataset](https://www.kaggle.com/datasets/sulianova/cardiovascular-disease-dataset)<br>
 Author: Svetlana Ulianova<br>
 Platform: Kaggle<br>
-File: [cardio_train (Original)](data/cardio_train(Original).csv) <br>
+File: [cardio_train (Original)](data/cardio_train (Original).csv)<br>
 The dataset consists of 70,000 records of patients data, 11 features + target.<br>
 
 Note: Transformed dataset after feature engineering is [cardio_train](data/cardio_train.csv) 
