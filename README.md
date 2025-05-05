@@ -1,6 +1,6 @@
 # About
 This repository contains code and materials for an automated end-to-end ML pipeline that predicts cardiovascular disease (CVD) risk.<br><br>
-Click [here](#data/EDA%20and%20Model%20Comparison/data-science-workflow) to view the **data science workflow**.<br>
+Click [here](data/EDA%20and%20Model%20Comparison/readme.md#data-science-workflow) to view the **data science workflow**.<br>
 Click [here](#deployment-via-flask) to view the **model deployment via Flask**.<br>
 Click [here](#end-to-end-ml-pipeline) to view the **end-to-end ML pipeline**.
 
