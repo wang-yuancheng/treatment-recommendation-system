@@ -167,32 +167,56 @@ This heatmap illustrates the Pearson correlation between various features and th
 ---
 
 #### 🔺 Top Positively Correlated Features with Cardiovascular Disease
-- **Systolic Blood Pressure (`systolic_bp`)**: 0.41
-- **Mean Arterial Pressure (`mean_arterial_pressure`)**: 0.39
-- **Diastolic Blood Pressure (`diastolic_bp`)**: 0.33
-- **Pulse Pressure (`pulse_pressure`)**: 0.31
-- **Age (`age_years`)**: 0.23
-- **Body Mass Index (`body_mass_index`)**: 0.17
 
-These moderate positive correlations suggest that individuals with higher blood pressure, higher BMI, and older age are more likely to have cardiovascular disease.
+<details>
+<summary><code>systolic_bp</code>, <code>mean_arterial_pressure</code>, <code>diastolic_bp</code>, <code>pulse_pressure</code>, <code>age_years</code>, and <code>body_mass_index</code> have moderate positive correlations</summary>
+
+<br>
+
+- **Systolic Blood Pressure (`systolic_bp`)**: 0.41  
+- **Mean Arterial Pressure (`mean_arterial_pressure`)**: 0.39  
+- **Diastolic Blood Pressure (`diastolic_bp`)**: 0.33  
+- **Pulse Pressure (`pulse_pressure`)**: 0.31  
+- **Age (`age_years`)**: 0.23  
+- **Body Mass Index (`body_mass_index`)**: 0.17  
+
+</details>
+
+These suggest that individuals with higher blood pressure, higher BMI, and older age are more likely to have cardiovascular disease.
 
 ---
 
 #### 🧪 Lab Indicators (Cholesterol and Glucose Levels)
-- **Cholesterol Level 3 (Well Above Normal)**: 0.19
-- **Cholesterol Level 2 (Above Normal)**: 0.07
-- **Glucose Level 2**: 0.08  
-- **Glucose Level 3**: 0.07
+
+<details>
+<summary><code>cholesterol_level_2</code>, <code>cholesterol_level_3</code>, <code>glucose_level_2</code>, and <code>glucose_level_3</code> show smaller but noticeable correlations</summary>
+
+<br>
+
+- **Cholesterol Level 3 (`cholesterol_level_3`)**: 0.19  
+- **Cholesterol Level 2 (`cholesterol_level_2`)**: 0.07  
+- **Glucose Level 2 (`glucose_level_2`)**: 0.08  
+- **Glucose Level 3 (`glucose_level_3`)**: 0.07  
+
+</details>
 
 These indicators show smaller, yet noticeable positive correlations with cardiovascular disease, indicating some association with elevated risk.
 
 ---
 
 #### ⚠️ Weak or Negligible Correlation Features
-- **Smoking Status**: 0.03
-- **Alcohol Consumption**: 0.01
-- **Physical Activity**: 0.04
-- **Gender**: 0.05
+
+<details>
+<summary><code>smoking_status</code>, <code>alcohol_consumption</code>, <code>physical_activity</code>, and <code>gender</code> show very weak correlation</summary>
+
+<br>
+
+- **Smoking Status (`smoking_status`)**: 0.03  
+- **Alcohol Consumption (`alcohol_consumption`)**: 0.01  
+- **Physical Activity (`physical_activity`)**: 0.04  
+- **Gender (`gender`)**: 0.05  
+
+</details>
 
 These variables show weak linear correlation with cardiovascular disease, though they may still contribute value in non-linear models or through interaction effects.
 
@@ -223,12 +247,59 @@ To reduce redundancy and improve model efficiency:
 - We **excluded derived variables** like **Mean Arterial Pressure (MAP)** and **Pulse Pressure**, which are calculated from SBP and DBP, to avoid multicollinearity.
 
 ## Modelling
-### Algorithms Used
-### Evaluation Metrics
-### Results
-![Chart](assets/Model%20Comparison%20%28Test%20Accuracy%29.png)
-![Chart](assets/Model%20Comparison%20%28Recall%29.png)
-![Chart](assets/Model%20Comparison%20%28ROC%20AUC%29.png) 
-### Model Training
 
-## Risk Reduction Simulation
+### Algorithms Used
+The following algorithms were used for model comparison:
+1. Logistic Regression
+2. Gaussian Naive Bayes
+3. k-Nearest Neighbors (kNN)
+4. Support Vector Machine (SVM - RBF Kernel)
+5. Decision Tree Classifier
+6. Random Forest Classifier
+7. XGBoost Classifier
+8. Multi-layer Perceptron (MLP)
+9. Voting Soft Ensemble (Soft Voting)
+
+### Evaluation Metrics
+The models were evaluated using the following metrics:
+- **Accuracy**: Measures the proportion of correctly predicted instances.
+- **Recall**: Focuses on the ability of the model to identify positive instances (minimizing false negatives).
+- **ROC AUC**: Measures the area under the Receiver Operating Characteristic curve, indicating the trade-off between sensitivity and specificity.
+
+### Results
+The performance of each model is summarized in the table below:
+
+| **Model**                  | **Accuracy** | **Recall** | **ROC AUC** |
+|----------------------------|-------------:|-----------:|------------:|
+| Logistic Regression        | 0.712       | 0.611      | 0.773       |
+| Gaussian Naive Bayes       | 0.697       | 0.580      | 0.757       |
+| k-Nearest Neighbors (kNN)  | 0.683       | 0.651      | 0.731       |
+| Support Vector Machine (SVM - RBF) | 0.713 | 0.592      | 0.769       |
+| Decision Tree              | 0.621       | 0.605      | 0.620       |
+| Random Forest              | 0.680       | 0.641      | 0.737       |
+| XGBoost                    | 0.713       | 0.635      | 0.775       |
+| Multi-layer Perceptron (MLP) | 0.719     | 0.640      | 0.782       |
+| Voting Soft Ensemble       | 0.718       | 0.634      | 0.782       |
+
+### Visualizations
+The following charts provide a visual comparison of the models:
+
+![Chart](assets/Model%20Comparison%20%28Test%20Accuracy%29.png)
+
+![Chart](assets/Model%20Comparison%20%28Recall%29.png)
+
+![Chart](assets/Model%20Comparison%20%28ROC%20AUC%29.png) 
+
+### Model Training
+Each model was trained on the dataset using the preprocessed features and target variable. The training process included:
+1. Splitting the data into training and testing sets (80/20 split).
+2. Feature scaling using MinMaxScaler for continuous and binary variables.
+3. One-hot encoding for ordinal features to avoid redundancy.
+4. Evaluating model predictions on the test set and calculating the metrics mentioned above.
+
+Additional details about the training setup:
+- Hyperparameters were set to reasonable defaults (e.g., `max_iter=1000` for Logistic Regression, `n_neighbors=5` for kNN).
+- For ensemble methods like Random Forest and Voting Classifier, 50 estimators were used.
+- MLP utilized a single hidden layer with 200 units, trained over 200 iterations.
+
+For further details, refer to the code in [Individual Model Comparison Notebook](https://github.com/wang-yuancheng/treatment-recommendation-system/blob/main/data/EDA%20and%20Model%20Comparison/Individual%20Model%20Comparison.ipynb).
