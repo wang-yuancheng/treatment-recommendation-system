@@ -1,5 +1,92 @@
 h1 {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.UserInput {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+.UserInput .form-group {
+  margin-bottom: 1.25rem;
+}
+
+.UserInput label {
+  display: block;
+  font-weight: 600;
+}
+
+.UserInput input[type="number"] {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.UserInput input[type="number"]:focus{
+  border-color: #007bff;
+  outline: none;
+}
+
+.UserInput fieldset {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.UserInput legend {
+  font-weight: bold;
+  padding: 0 0.5rem;
+}
+
+.UserInput fieldset > div {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.UserInput fieldset > div:last-child {
+  margin-bottom: 0;
+}
+
+.UserInput fieldset input[type="radio"] {
+  margin-right: 0.5rem;
+}
+
+.UserInput button {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.UserInput button:hover {
+  background: #0056b3;
+}
+
+.sample {
+  max-width: 620px;
+  margin: 0.5rem auto;
+  padding: 0.5rem 1rem;
+  background: #f9f9f9;
+  border-radius: 4px;
+  font-family: Arial, sans-serif;
+  color: #333;
+  font-weight: bold;
 }
