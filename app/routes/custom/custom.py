@@ -1,16 +1,20 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, url_for, redirect
 from app.models import *
 import pandas as pd
 
 # Create the Blueprint object
-main_bp = Blueprint('custom', __name__, template_folder='templates')
+custom_bp = Blueprint('custom', __name__, template_folder='templates')
+# by default static_folder=None
+# by default static_url_path=None
+# by default template_folder=None → uses app’s templates
 
 # Define the routes on the blueprint
-@main_bp.route('/', methods=["GET"])
+@custom_bp.route('/', methods=["GET"])
 def home():
     return render_template('index.html')
 
-@main_bp.route('/predict', methods=["POST"])
+#here, predict() is a view function and does whatever needed from the incoming http request and returns http response
+@custom_bp.route('/predict', methods=["POST"])
 def predict():
     data = {} #create a dictionary to store patient data
     variables = ['age', 'gender', 'height', 'weight', 'sbp', 'dbp', 'chol', 'gluc', 'smoke', 'alcohol', 'active']

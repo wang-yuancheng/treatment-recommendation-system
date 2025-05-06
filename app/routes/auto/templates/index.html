@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Flask App{% endblock %}</title>
+  <link rel="stylesheet" href="../../../static/styles.css">
+</head>
+<body>
+  <header>
+    <h1>{% block header %}AUTO ML{% endblock %}</h1>
+  </header>
+    <main>
+      {% block content %}
+        <form method="POST" action="/auto_predict" class="UserInput">
+          <div class="form-group">
+            <button type="submit">Submit</button>
+          </div>
+        </form>
+      {% endblock %}
+    </main>
+</body>
+</html>

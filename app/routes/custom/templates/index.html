@@ -4,144 +4,136 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Flask App{% endblock %}</title>
-  <link rel="stylesheet" href="../../../static/styles.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
 </head>
 <body>
   <header>
-      <h1>{% block header %}Personalized Treatment Recommendation System{% endblock %}</h1>
-    </header>
+    <h1>{% block header %}Cardiovascular Disease Prediction{% endblock %}</h1>
+  </header>
 
-    <main>
-      {% block content %}
-        <div class="sample">
-          Sample Patients:                       <br>
-          age, bmi, sbp, dbp, chol, gluc         <br>
-          30,22.5,120,80,1,1   - Low  risk       <br>
-          50,28.0,130,85,2,2   - Mild risk       <br>
-          70,36.0,160,99,3,3   - High risk       <br>
-        </div>
+  <main>
+    {% block content %}
+      <div class="sample">
+        Sample Patients:                       <br>
+        age, bmi, sbp, dbp, chol, gluc         <br>
+        30,22.5,120,80,1,1   - Low  risk       <br>
+        50,28.0,130,85,2,2   - Mild risk       <br>
+        70,36.0,160,99,3,3   - High risk       <br>
+      </div>
 
-        <form method="POST" action="/predict" class="UserInput">
-          <fieldset>
-            <legend>Patient Information</legend>
+      <form method="POST" action="{{ url_for('custom.predict') }}" class="UserInput">
+        <fieldset>
+          <legend>Patient Information</legend>
 
-            <fieldset class="form-group">
-              <legend>Age (0–100):</legend>
-              <div class="form-group">
-                <input type="number" id="age" name="age" min="0" max="100" step="1" required placeholder="e.g. 30">
-              </div>
-            </fieldset>
-
-            <fieldset class="form-group">
-              <legend>Gender</legend>
-              <div>
-                <input type="radio" id="gender_male" name="gender" value="2" required> <label for="gender_male">Male</label>
-              </div>
-              <div>
-                <input type="radio" id="gender_female" name="gender" value="1"> <label for="gender_female">Female</label>
-              </div>
-            </fieldset>
-
-            <fieldset class="form-group">
-              <legend>Height (m):</legend>
-              <div>
-                <input type="number" id="height" name="height" min="0.5" max="2.5" step="0.01" required placeholder="e.g. 1.75">
-              </div>
-            </fieldset>
-
-            <fieldset class="form-group">
-              <legend>Weight (kg):</legend>
-              <div class="form-group">
-               <input type="number" id="weight" name="weight" min="20" max="200" step="0.1" required placeholder="e.g. 70.5">
-              </div>
-            </fieldset>
-
-            <!--
-            <fieldset class="form-group">
-              <legend>Body Mass Index (BMI):</legend>
-              <div class="form-group">
-               <input type="number" id="bmi" name="bmi" min="0" max="100" step="0.1" required placeholder="e.g. 22.5">
-              </div>
-            </fieldset>
-            -->
-
-            <fieldset class="form-group">
-              <legend>Systolic BP (50–250):</legend>
-              <div class="form-group">
-                <input type="number" id="sbp" name="sbp" min="50" max="250" step="1" required placeholder="e.g. 120">
-              </div>
-            </fieldset>
-
-            <fieldset class="form-group">
-              <legend>Diastolic BP (30–150):</legend>
-              <div class="form-group">
-                <input type="number" id="dbp" name="dbp" min="30" max="150" step="1" required placeholder="e.g. 80">
-              </div>
-            </fieldset>
-
-            <fieldset class="form-group">
-              <legend>Cholesterol</legend>
-              <div>
-                <input type="radio" id="cholesterol_normal" name="chol" value="1" required> <label for="cholesterol_normal">Normal</label>
-              </div>
-              <div>
-                <input type="radio" id="cholesterol_above" name="chol" value="2"> <label for="cholesterol_above">Above Normal</label>
-              </div>
-              <div>
-                <input type="radio" id="cholesterol_high" name="chol" value="3"> <label for="cholesterol_high">Well Above Normal</label>
-              </div>
-            </fieldset>
-
-            <fieldset class="form-group">
-              <legend>Glucose</legend>
-              <div>
-                <input type="radio" id="glucose_normal" name="gluc" value="1" required> <label for="glucose_normal">Normal</label>
-              </div>
-              <div>
-                <input type="radio" id="glucose_above" name="gluc" value="2"> <label for="glucose_above">Above Normal</label>
-              </div>
-              <div>
-                <input type="radio" id="glucose_high" name="gluc" value="3"> <label for="glucose_high">Well Above Normal</label>
-              </div>
-            </fieldset>
-
-            <fieldset class="form-group">
-              <legend>Smoker</legend>
-              <div>
-                <input type="radio" id="smoke_yes" name="smoke" value="1" required> <label for="smoke_yes">Yes</label>
-              </div>
-              <div>
-                <input type="radio" id="smoke_no" name="smoke" value="0"> <label for="smoke_no">No</label>
-              </div>
-            </fieldset>
-
-            <fieldset class="form-group">
-              <legend>Alcohol Consumption</legend>
-              <div>
-                <input type="radio" id="alcohol_yes" name="alcohol" value="1" required> <label for="alcohol_yes">Yes</label>
-              </div>
-              <div>
-                <input type="radio" id="alcohol_no" name="alcohol" value="0"> <label for="alcohol_no">No</label>
-              </div>
-            </fieldset>
-
-            <fieldset class="form-group">
-              <legend>Physical Activity</legend>
-              <div>
-                <input type="radio" id="active_yes" name="active" value="1" required> <label for="active_yes">Yes</label>
-              </div>
-              <div>
-                <input type="radio" id="active_no" name="active" value="0"> <label for="active_no">No</label>
-              </div>
-            </fieldset>
-
+          <fieldset class="form-group">
+            <legend>Age (0–100):</legend>
             <div class="form-group">
-              <button type="submit">Submit</button>
+              <input type="number" id="age" name="age" min="0" max="100" step="1" required placeholder="e.g. 30">
             </div>
-
           </fieldset>
-        </form>
-        {% endblock %}
-    </main>
+
+          <fieldset class="form-group">
+            <legend>Gender</legend>
+            <div>
+              <input type="radio" id="gender_male" name="gender" value="2" required> <label for="gender_male">Male</label>
+            </div>
+            <div>
+              <input type="radio" id="gender_female" name="gender" value="1"> <label for="gender_female">Female</label>
+            </div>
+          </fieldset>
+
+          <fieldset class="form-group">
+            <legend>Height (m):</legend>
+            <div>
+              <input type="number" id="height" name="height" min="0.5" max="2.5" step="0.01" required placeholder="e.g. 1.75">
+            </div>
+          </fieldset>
+
+          <fieldset class="form-group">
+            <legend>Weight (kg):</legend>
+            <div class="form-group">
+             <input type="number" id="weight" name="weight" min="20" max="200" step="0.1" required placeholder="e.g. 70.5">
+            </div>
+          </fieldset>
+
+          <fieldset class="form-group">
+            <legend>Systolic BP (50–250):</legend>
+            <div class="form-group">
+              <input type="number" id="sbp" name="sbp" min="50" max="250" step="1" required placeholder="e.g. 120">
+            </div>
+          </fieldset>
+
+          <fieldset class="form-group">
+            <legend>Diastolic BP (30–150):</legend>
+            <div class="form-group">
+              <input type="number" id="dbp" name="dbp" min="30" max="150" step="1" required placeholder="e.g. 80">
+            </div>
+          </fieldset>
+
+          <fieldset class="form-group">
+            <legend>Cholesterol</legend>
+            <div>
+              <input type="radio" id="cholesterol_normal" name="chol" value="1" required> <label for="cholesterol_normal">Normal</label>
+            </div>
+            <div>
+              <input type="radio" id="cholesterol_above" name="chol" value="2"> <label for="cholesterol_above">Above Normal</label>
+            </div>
+            <div>
+              <input type="radio" id="cholesterol_high" name="chol" value="3"> <label for="cholesterol_high">Well Above Normal</label>
+            </div>
+          </fieldset>
+
+          <fieldset class="form-group">
+            <legend>Glucose</legend>
+            <div>
+              <input type="radio" id="glucose_normal" name="gluc" value="1" required> <label for="glucose_normal">Normal</label>
+            </div>
+            <div>
+              <input type="radio" id="glucose_above" name="gluc" value="2"> <label for="glucose_above">Above Normal</label>
+            </div>
+            <div>
+              <input type="radio" id="glucose_high" name="gluc" value="3"> <label for="glucose_high">Well Above Normal</label>
+            </div>
+          </fieldset>
+
+          <fieldset class="form-group">
+            <legend>Smoker</legend>
+            <div>
+              <input type="radio" id="smoke_yes" name="smoke" value="1" required> <label for="smoke_yes">Yes</label>
+            </div>
+            <div>
+              <input type="radio" id="smoke_no" name="smoke" value="0"> <label for="smoke_no">No</label>
+            </div>
+          </fieldset>
+
+          <fieldset class="form-group">
+            <legend>Alcohol Consumption</legend>
+            <div>
+              <input type="radio" id="alcohol_yes" name="alcohol" value="1" required> <label for="alcohol_yes">Yes</label>
+            </div>
+            <div>
+              <input type="radio" id="alcohol_no" name="alcohol" value="0"> <label for="alcohol_no">No</label>
+            </div>
+          </fieldset>
+
+          <fieldset class="form-group">
+            <legend>Physical Activity</legend>
+            <div>
+              <input type="radio" id="active_yes" name="active" value="1" required> <label for="active_yes">Yes</label>
+            </div>
+            <div>
+              <input type="radio" id="active_no" name="active" value="0"> <label for="active_no">No</label>
+            </div>
+          </fieldset>
+
+          <div class="form-group">
+            <button type="submit">Submit</button>
+          </div>
+
+        </fieldset>
+      </form>
+      {% endblock %}
+  </main>
 </body>
 </html>

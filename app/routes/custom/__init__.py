@@ -1,1 +1,1 @@
-from app.routes.custom.main import main_bp
+from app.routes.custom.custom import custom_bp
