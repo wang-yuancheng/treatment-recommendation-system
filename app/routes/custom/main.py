@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, request
-from app.models import pipeline
+from app.models import *
 import pandas as pd
 
 # Create the Blueprint object
-main_bp = Blueprint('main', __name__, template_folder='templates')
+main_bp = Blueprint('custom', __name__, template_folder='templates')
 
 # Define the routes on the blueprint
 @main_bp.route('/', methods=["GET"])
@@ -34,7 +34,7 @@ def predict():
         'glucose_level': data["gluc"]
     }])
 
-    proba = pipeline.predict_proba(df_user)[0, 1]  # returns class 1: probability of disease
+    proba = custom_pipeline.predict_proba(df_user)[0, 1]  # returns class 1: probability of disease
     print(f"Predicted cardiovascular risk: {proba:.3f}")
 
     return render_template('predict.html', result=proba)

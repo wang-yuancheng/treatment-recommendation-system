@@ -5,7 +5,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn.neural_network import MLPClassifier
 
-healthDataRaw = pd.read_csv('../data/cardio_train.csv')
+healthDataRaw = pd.read_csv('../../data/cardio_train.csv')
 
 # assuming your DataFrame is named df_clean
 rename_map = {
@@ -71,4 +71,4 @@ pipeline = Pipeline([
 pipeline.fit(X_df, y)
 
 # save model for deployment
-joblib.dump(pipeline, 'pipeline.pkl')
+joblib.dump(pipeline, 'custompipeline.pkl')
