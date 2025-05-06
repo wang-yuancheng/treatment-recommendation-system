@@ -11,8 +11,24 @@
     <h1>{% block header %}AUTO ML{% endblock %}</h1>
   </header>
     <main>
-      {% block content %}
-      {% endblock %}
+      <!-- render flash messages -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for msg in messages %}
+            <li>{{ msg }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}
+      <form method="POST" action="{{ url_for('auto.auto_home') }}" enctype="multipart/form-data">
+        <label for="file">Upload your dataset (.csv only)</label>
+        <input type="file" id="file" name="file" accept=".csv">
+        <button type="submit">Upload</button>
+      </form>
+    {% endblock %}
     </main>
 </body>
 </html>

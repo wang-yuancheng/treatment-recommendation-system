@@ -4,6 +4,28 @@ h1 {
   align-items: center;
 }
 
+.home-form {
+  display: flex;
+  justify-content: center;
+}
+
+.home-form button {
+  margin: 0.5rem;
+  width: 7rem;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+  padding: 0.6rem 1.2rem;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
 .UserInput {
   max-width: 600px;
   margin: 2rem auto;
@@ -65,7 +87,6 @@ h1 {
 }
 
 .UserInput button {
-  display: inline-block;
   padding: 0.6rem 1.2rem;
   background: #007bff;
   color: #fff;

@@ -1,7 +1,7 @@
 import os
 import joblib
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__)) # Get root of project (treatment-recommendation-system)
+BASE_DIR = os.path.dirname(os.path.dirname(__file__)) # Get root of project
 
 # Build the path to the saved custom_pipeline
 # AUTO_PIPELINE_PATH = os.path.join(BASE_DIR, 'model', 'auto_models', 'auto_pipeline.pkl')

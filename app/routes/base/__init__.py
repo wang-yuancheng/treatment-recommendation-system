@@ -1,1 +1,1 @@
-#from app.routes.custom.auto import undefined_bp
+from app.routes.base.base import base_bp
