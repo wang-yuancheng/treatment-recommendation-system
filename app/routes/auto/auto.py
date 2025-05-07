@@ -2,6 +2,9 @@ from flask import Blueprint, render_template, request, url_for, redirect, flash,
 from werkzeug.utils import secure_filename
 import pandas as pd
 import os
+import uuid
+from app.paths import *
+from model.auto_models.auto_model_train import load_dataset
 
 # Create the Blueprint object
 auto_bp = Blueprint('auto', __name__)
@@ -33,12 +36,23 @@ def auto_home():
         # Proceed only if a file is provided and it has an approved CSV extension
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)           # Clean the filename to prevent unsafe characters or path traversal
-            upload_folder = current_app.config['UPLOAD_FOLDER'] # Get the upload directory path from app configuration
-            os.makedirs(upload_folder, exist_ok=True)           # Creates Upload_folder, if already exist, continue with no error
-            save_path = os.path.join(upload_folder, filename)   # Build the full path where the file will be saved
-            file.save(save_path)                                # Save the uploaded file
+
+            job_id = str(uuid.uuid4())                          # Create random UUID for each upload
+            base_dir = UPLOAD_FOLDER_PATH                       # Get the upload directory path
+            job_dir = os.path.join(base_dir, job_id)            # Create unique directory for each csv
+            os.makedirs(job_dir, exist_ok=True)                 # Creates Upload_Folder, if already exist, continue with no error
+            save_path = os.path.join(job_dir, filename)          # Build the full path where the file will be saved
+            file.save(save_path)                                 # Save the uploaded file
             flash(f'File saved to {save_path}')
-            return redirect(url_for('auto.auto_home'))
+
+            # immediately load into a DataFrame
+            try:
+                df = load_dataset(save_path)
+                flash(f"Dataset loaded: {df.shape[0]} rows × {df.shape[1]} cols")
+            except Exception as e:
+                flash(f"Error loading dataset: {e}", "error")
+
+            return redirect(url_for('status.view', job_id=job_id))
         else:
             flash('Only CSV files are allowed')
             return redirect(request.url) #refreshs the page
