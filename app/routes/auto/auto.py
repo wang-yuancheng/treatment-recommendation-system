@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, request, url_for, redirect, flash, current_app
 from werkzeug.utils import secure_filename
-import pandas as pd
 import os, uuid
 from app.paths import *
-from model.auto_models.auto_model_train import load_dataset
+from model.auto_models.auto_model_train import load_dataset, run_pipeline
 from app.utils import get_csv_path
+from app.models import auto_pipeline, custom_pipeline
 
 # Create the Blueprint object
 auto_bp = Blueprint('auto', __name__)
@@ -60,7 +60,6 @@ def auto_preview(job_id):
 
     # user input for target feature
     if request.method == "POST":
-        features = request.form.get("features")
         target = request.form.get("target") # takes in value="{{ col }} and assign it to target
         return redirect(url_for('auto.auto_predict', job_id=job_id, target=str(target)))
 
@@ -70,12 +69,22 @@ def auto_preview(job_id):
                            column=df.columns,
                            tables=[df.head().to_html(classes='data', index=False)])
 
-@auto_bp.route('/auto/<job_id>/<target>/predict', methods=["GET", "POST"])
+@auto_bp.route('/auto/<job_id>/<target>/predict', methods=["GET"])
 def auto_predict(job_id, target):
     csv_path = get_csv_path(job_id)
     df = load_dataset(csv_path)
     features = [col for col in df.columns if col != target]
-    
-    # we now have the target and the list of features and can proceed with data science workflow
 
-    return render_template('auto/loading.html', target=target, features=features)
+    # Should run the pipeline and dumps the trained model to its specific job model folder
+    # This could take time, so if we instantly try to load it via auto_pipeline.predict_proba(), it may crash
+    run_pipeline(df, features, target, job_id)
+
+    # need to get df_user
+    # proba = auto_pipeline.predict_proba(df_user)[0, 1]  # returns class 1: probability of disease
+    # print(f"Predicted cardiovascular risk: {proba:.3f}")
+
+    return render_template('auto/predict.html',
+                           target=target,
+                           features=features
+                        # result=proba
+    )
