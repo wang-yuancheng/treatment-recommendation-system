@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, request, url_for, redirect, flash, current_app
 from werkzeug.utils import secure_filename
 import pandas as pd
-import os
-import uuid
+import os, uuid
 from app.paths import *
 from model.auto_models.auto_model_train import load_dataset
+from app.utils import get_csv_path
 
 # Create the Blueprint object
 auto_bp = Blueprint('auto', __name__)
@@ -17,48 +17,54 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Define the routes on the blueprint
-@auto_bp.route('/auto', methods=["GET", "POST"])
+@auto_bp.route('/auto', methods=["GET"])
 def auto_home():
-    if request.method == 'POST':
-
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('No file uploaded')
-            return redirect(request.url) #refreshs the page
-
-        file = request.files['file']
-
-        # If the user does not select a file, the browser submits an empty file without a filename.
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url) #refreshs the page
-
-        # Proceed only if a file is provided and it has an approved CSV extension
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)           # Clean the filename to prevent unsafe characters or path traversal
-
-            job_id = str(uuid.uuid4())                          # Create random UUID for each upload
-            base_dir = UPLOAD_FOLDER_PATH                       # Get the upload directory path
-            job_dir = os.path.join(base_dir, job_id)            # Create unique directory for each csv
-            os.makedirs(job_dir, exist_ok=True)                 # Creates Upload_Folder, if already exist, continue with no error
-            save_path = os.path.join(job_dir, filename)          # Build the full path where the file will be saved
-            file.save(save_path)                                 # Save the uploaded file
-            flash(f'File saved to {save_path}')
-
-            # immediately load into a DataFrame
-            try:
-                df = load_dataset(save_path)
-                flash(f"Dataset loaded: {df.shape[0]} rows × {df.shape[1]} cols")
-            except Exception as e:
-                flash(f"Error loading dataset: {e}", "error")
-
-            return redirect(url_for('status.view', job_id=job_id))
-        else:
-            flash('Only CSV files are allowed')
-            return redirect(request.url) #refreshs the page
-
     return render_template('auto/index.html')
 
-@auto_bp.route('/auto_predict', methods=["POST"])
+@auto_bp.route('/auto/upload', methods=["POST"])
+def auto_upload():
+    # check if the post request has the file part
+    if 'file' not in request.files:
+        flash('No file uploaded')
+        return redirect(url_for('auto.auto_home'))
+
+    file = request.files['file']
+
+    # If the user does not select a file, the browser submits an empty file without a filename.
+    if file.filename == '' or not allowed_file(file.filename):
+        flash('Please select a valid CSV file', 'error')
+        return redirect(url_for('auto.auto_home'))
+
+    filename = secure_filename(file.filename)             # Clean the filename to prevent unsafe characters or path traversal
+    job_id = str(uuid.uuid4())                            # Create random UUID for each upload
+    job_dir = os.path.join(UPLOAD_FOLDER_PATH, job_id)    # Create unique directory for each csv
+    os.makedirs(job_dir, exist_ok=True)                   # Creates Upload_Folder, if already exist, continue with no error
+    save_path = os.path.join(job_dir, filename)           # Build the full path where the file will be saved
+    file.save(save_path)                                  # Save the uploaded file
+    flash(f'File saved to {save_path}')
+
+    # redirect to preview page
+    return redirect(url_for('auto.auto_preview' ,job_id=job_id))
+
+@auto_bp.route('/auto/preview/<job_id>', methods=["GET", "POST"])
+def auto_preview(job_id):
+    # locate the CSV inside the job folder
+    csv_path = get_csv_path(job_id)
+
+    # Load Dataframe
+    try:
+        df = load_dataset(csv_path)
+        flash(f"Dataset loaded: {df.shape[0]} rows × {df.shape[1]} cols")
+    except Exception as e:
+        flash(f"Error loading dataset: {e}", "error")
+
+    # user input for target feature
+    if request.method == "POST":
+        target = request.form.get("target")
+        return redirect(url_for('', job_id=job_id, target=target))
+
+    return render_template('auto/preview.html', job_id=job_id)
+
+@auto_bp.route('/auto/predict', methods=["POST"])
 def auto_predict():
     return render_template('auto/predict.html')

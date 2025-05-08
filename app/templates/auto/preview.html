@@ -23,11 +23,7 @@
     {% endwith %}
 
     {% block content %}
-      <form method="POST" action="{{ url_for('auto.auto_upload') }}" enctype="multipart/form-data">
-        <label for="file">Upload your dataset (.csv only)</label>
-        <input type="file" id="file" name="file" accept=".csv">
-        <button type="submit">Upload</button>
-      </form>
+      <div>Preview Dataframe Here and submit form for target</div>
     {% endblock %}
     </main>
 </body>
