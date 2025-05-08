@@ -44,9 +44,9 @@ def auto_upload():
     flash(f'File saved to {save_path}')
 
     # redirect to preview page
-    return redirect(url_for('auto.auto_preview' ,job_id=job_id))
+    return redirect(url_for('auto.auto_preview', job_id=job_id))
 
-@auto_bp.route('/auto/preview/<job_id>', methods=["GET", "POST"])
+@auto_bp.route('/auto/<job_id>', methods=["GET", "POST"])
 def auto_preview(job_id):
     # locate the CSV inside the job folder
     csv_path = get_csv_path(job_id)
@@ -60,11 +60,15 @@ def auto_preview(job_id):
 
     # user input for target feature
     if request.method == "POST":
-        target = request.form.get("target")
-        return redirect(url_for('', job_id=job_id, target=target))
+        target = request.form.get("target") # takes in value="{{ col }} and assign it to target
+        return redirect(url_for('auto.auto_predict', job_id=job_id, target=str(target)))
 
-    return render_template('auto/preview.html', job_id=job_id)
+    # to render the dataframe as a table in html
+    return render_template('auto/preview.html',
+                           job_id=job_id,
+                           column=df.columns,
+                           tables=[df.head().to_html(classes='data')])
 
-@auto_bp.route('/auto/predict', methods=["POST"])
+@auto_bp.route('/auto/<job_id>/predict', methods=["POST"])
 def auto_predict():
     return render_template('auto/predict.html')

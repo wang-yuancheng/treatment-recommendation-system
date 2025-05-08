@@ -12,19 +12,31 @@
   </header>
     <main>
       <!-- render flash messages -->
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul class="flashes">
-          {% for msg in messages %}
-            <li>{{ msg }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <ul class="flashes">
+            {% for msg in messages %}
+              <li>{{ msg }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
 
-    {% block content %}
-      <div>Preview Dataframe Here and submit form for target</div>
-    {% endblock %}
+      <!-- Display dataframe as a table -->
+      {% for table in tables %}
+        {{ table|safe }}
+      {% endfor %}
+
+      <!-- Allow user to specify target feature -->
+      <form method="POST">
+        <label for="target">Select Target Column:</label>
+        <select id="target" name="target">
+          {% for col in column %}
+            <option value="{{ col }}">{{ col }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit">Submit</button>
+      </form>
     </main>
 </body>
 </html>

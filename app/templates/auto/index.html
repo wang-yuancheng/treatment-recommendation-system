@@ -11,7 +11,7 @@
     <h1>{% block header %}AUTO ML{% endblock %}</h1>
   </header>
     <main>
-      <!-- render flash messages -->
+    <!-- render flash messages -->
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <ul class="flashes">
@@ -22,6 +22,7 @@
       {% endif %}
     {% endwith %}
 
+    <!-- Allow user to upload dataset -->
     {% block content %}
       <form method="POST" action="{{ url_for('auto.auto_upload') }}" enctype="multipart/form-data">
         <label for="file">Upload your dataset (.csv only)</label>
