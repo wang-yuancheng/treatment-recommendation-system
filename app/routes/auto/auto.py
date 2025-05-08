@@ -60,6 +60,7 @@ def auto_preview(job_id):
 
     # user input for target feature
     if request.method == "POST":
+        features = request.form.get("features")
         target = request.form.get("target") # takes in value="{{ col }} and assign it to target
         return redirect(url_for('auto.auto_predict', job_id=job_id, target=str(target)))
 
@@ -67,8 +68,14 @@ def auto_preview(job_id):
     return render_template('auto/preview.html',
                            job_id=job_id,
                            column=df.columns,
-                           tables=[df.head().to_html(classes='data')])
+                           tables=[df.head().to_html(classes='data', index=False)])
 
-@auto_bp.route('/auto/<job_id>/predict', methods=["POST"])
-def auto_predict():
-    return render_template('auto/predict.html')
+@auto_bp.route('/auto/<job_id>/<target>/predict', methods=["GET", "POST"])
+def auto_predict(job_id, target):
+    csv_path = get_csv_path(job_id)
+    df = load_dataset(csv_path)
+    features = [col for col in df.columns if col != target]
+    
+    # we now have the target and the list of features and can proceed with data science workflow
+
+    return render_template('auto/loading.html', target=target, features=features)

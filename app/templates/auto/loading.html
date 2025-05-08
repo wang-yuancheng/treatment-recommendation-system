@@ -7,7 +7,13 @@
 <body>
     <main>
         {% block content %}
-        Result : {{ result }}
+        Your chosen target is: {{ target }} <br>
+
+        Your features are:
+        {% for feature in features %}
+        {{ feature }} <br>
+        {% endfor %}
+
         {% endblock %}
     </main>
 </body>
