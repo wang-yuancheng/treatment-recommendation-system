@@ -1,10 +1,9 @@
-from flask import Blueprint, render_template, request, url_for, redirect, flash, current_app
+from flask import Blueprint, render_template, request, url_for, redirect, flash
 from werkzeug.utils import secure_filename
 import os, uuid
 from app.paths import *
-from model.auto_models.auto_model_train import load_dataset, run_pipeline
+from app.model.auto_models.auto_model_train import load_dataset, run_pipeline
 from app.utils import get_csv_path
-from app.models import auto_pipeline, custom_pipeline
 
 # Create the Blueprint object
 auto_bp = Blueprint('auto', __name__)
@@ -75,8 +74,29 @@ def auto_predict(job_id, target):
     df = load_dataset(csv_path)
     features = [col for col in df.columns if col != target]
 
+
+
+
+
+
+
+
+
     # Should run the pipeline and dumps the trained model to its specific job model folder
     # This could take time, so if we instantly try to load it via auto_pipeline.predict_proba(), it may crash
+
+
+
+
+
+
+
+
+
+
+
+
+
     run_pipeline(df, features, target, job_id)
 
     # need to get df_user
