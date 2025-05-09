@@ -8,8 +8,7 @@ from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn.neural_network import MLPClassifier
 
 def load_dataset(save_path):
-    df = pd.read_csv(save_path)
-    return df
+    return pd.read_csv(save_path)
 
 def remove_outliers():
     pass
@@ -24,11 +23,35 @@ def hyperparameter_tuning():
     pass
 
 def run_pipeline(df, features, target, job_id):
+    """
+    1) Builds X/y from df, features, target
+    2) Trains & tunes the model
+    3) Packages everything into a sklearn Pipeline
+    4) Dumps the pipeline to disk under AUTO_MODELS_FOLDER_PATH/job_id/custompipeline.pkl
+    5) Returns the fitted Pipeline object
+    """
+
+    # 1) Extract X, y
+    # 2) Clean
+    # 3) Train
+    # 4) Wrap in a Pipeline (e.g. with preprocessors)
     '''
-    # save model for deployment
+    pipe = Pipeline([
+      ('pre', ColumnTransformer([
+         ('scale', MinMaxScaler(), features),
+         ('ohe',   OneHotEncoder(drop='first', sparse_output=False), [])
+      ])),
+      ('clf', best_model)
+    ])
+
+    pipe.fit(X, y)
+    '''
+
+    # 5) Dump it
+    '''
     model_dir = os.path.join(AUTO_MODELS_FOLDER_PATH, job_id)
     os.makedirs(model_dir, exist_ok=True)
-    model_path = os.path.join(str(model_dir), "custompipeline.pkl")
-    joblib.dump(fitted_pipeline, model_path)
+    path = os.path.join(model_dir, 'custompipeline.pkl')
+    joblib.dump(pipe, path)
     '''
     pass

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Training in Progress</title>
+</head>
+<body>
+  <h1>Training Your Model</h1>
+  <p>Please wait while your model is being trained. This may take a few moments.</p>
+  <p>Status: <span id="state">Pending</span></p>
+
+  <script>
+    const statusUrl  = "{{ url_for('auto.task_status', task_id=task_id) }}";
+    const predictUrl = "{{ url_for('auto.auto_predict', job_id=job_id, target=target) }}";
+
+    function check() {
+      fetch(statusUrl)            // Sends an HTTP request to the statusUrl that returns JSON about the task status
+        .then(res => res.json())  // Once the response comes back, .json() reads it and turns it into a JavaScript object.
+        .then(data => {
+          // update displayed state
+          document.getElementById('state').textContent = data.state;
+          if (data.ready) {
+            // once complete, navigate to predict
+            window.location.href = predictUrl; // Redirect browser to the prediction page by setting window url to a new url
+          } else {
+            // otherwise poll again in 2 seconds
+            setTimeout(check, 2000);
+          }
+        })
+        .catch(err => {
+          console.error('Status check failed:', err);
+          // retry after a longer delay on error
+          setTimeout(check, 5000);
+        });
+    }
+
+    // When the HTML page has fully loaded, start checking the task status
+    document.addEventListener('DOMContentLoaded', check);
+  </script>
+</body>
+</html>

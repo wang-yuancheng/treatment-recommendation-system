@@ -1,9 +1,13 @@
-from flask import Blueprint, render_template, request, url_for, redirect, flash
+from flask import Blueprint, render_template, request, url_for, redirect, flash, jsonify
 from werkzeug.utils import secure_filename
 import os, uuid
 from app.paths import *
-from app.model.auto_models.auto_model_train import load_dataset, run_pipeline
+from app.model.auto_models.auto_model_train import load_dataset
 from app.utils import get_csv_path
+from app.tasks.train_tasks import train_pipeline_task
+from app.models import auto_pipeline
+from app.celery_app import celery_app
+from celery.result import AsyncResult
 
 # Create the Blueprint object
 auto_bp = Blueprint('auto', __name__)
@@ -60,7 +64,7 @@ def auto_preview(job_id):
     # user input for target feature
     if request.method == "POST":
         target = request.form.get("target") # takes in value="{{ col }} and assign it to target
-        return redirect(url_for('auto.auto_predict', job_id=job_id, target=str(target)))
+        return redirect(url_for('auto.auto_train', job_id=job_id, target=str(target)))
 
     # to render the dataframe as a table in html
     return render_template('auto/preview.html',
@@ -68,43 +72,33 @@ def auto_preview(job_id):
                            column=df.columns,
                            tables=[df.head().to_html(classes='data', index=False)])
 
-@auto_bp.route('/auto/<job_id>/<target>/predict', methods=["GET"])
+@auto_bp.route('/auto/<job_id>/<target>/train', methods=['POST'])
+def auto_train(job_id, target):
+    # Runs the task asynchronously in background, returns a AsyncResult object
+    # train_pipeline_task.delay(job_id, target) -> Celery pushes this task into Redis
+    task = train_pipeline_task.delay(job_id, target)
+
+    # Every Celery task is given a unique ID when it's queued. result.id gives you that task ID (string)
+    return render_template('auto/loading.html', job_id=job_id, target=target, task_id=task.id) # Get the unique ID of the background task to track its status later
+
+@auto_bp.route('/auto/status/<task_id>', methods=['GET']) # Just reading task status (GET)
+def task_status(task_id):
+    res = AsyncResult(task_id, app=celery_app)
+    return jsonify({'state': res.state,                 # PENDING, STARTED, SUCCESS, FAILURE, etc.
+                    'ready': res.state == 'SUCCESS'})   # True only if task finished successfully
+
+@auto_bp.route('/auto/<job_id>/<target>/predict', methods=["GET", "POST"])
 def auto_predict(job_id, target):
     csv_path = get_csv_path(job_id)
     df = load_dataset(csv_path)
     features = [col for col in df.columns if col != target]
 
-
-
-
-
-
-
-
-
-    # Should run the pipeline and dumps the trained model to its specific job model folder
-    # This could take time, so if we instantly try to load it via auto_pipeline.predict_proba(), it may crash
-
-
-
-
-
-
-
-
-
-
-
-
-
-    run_pipeline(df, features, target, job_id)
-
-    # need to get df_user
+    # TODO: get df_user
     # proba = auto_pipeline.predict_proba(df_user)[0, 1]  # returns class 1: probability of disease
     # print(f"Predicted cardiovascular risk: {proba:.3f}")
 
     return render_template('auto/predict.html',
                            target=target,
                            features=features
-                        # result=proba
+                         # result=proba
     )
