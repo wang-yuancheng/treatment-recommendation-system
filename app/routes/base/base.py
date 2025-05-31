@@ -11,5 +11,5 @@ def home():
         if userinput == "auto":
             return redirect(url_for('auto.auto_home')) # url_for(blueprint_name.function_name)
         if userinput == "custom":
-            return redirect(url_for('custom.cardio_home')) #Flask looks up 'cardio.home' in its internal URL map which was has blueprint already registered
+            return redirect(url_for('custom.cardio_home')) # Flask looks up 'cardio.home' in its internal URL map which was has blueprint already registered
     return render_template('base/base.html')
