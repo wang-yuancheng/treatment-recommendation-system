@@ -9,32 +9,58 @@
   <p>Please wait while your model is being trained. This may take a few moments.</p>
   <p>Status: <span id="state">Pending</span></p>
 
+  <!-- New elements for displaying elapsed time and poll count -->
+  <p>Elapsed time: <span id="elapsed">0s</span></p>
+  <p>Polls made: <span id="count">0</span></p>
+
   <script>
+    const task_id = "{{ task_id }}";
+    const job_id  = "{{ job_id }}";
+    const target  = "{{ target }}";
     const statusUrl  = "{{ url_for('auto.task_status', task_id=task_id) }}";
-    const predictUrl = "{{ url_for('auto.auto_predict', job_id=job_id, target=target) }}";
+    const predictUrl = "{{ url_for('auto.auto_predict', job_id=job_id, target=target, task_id=task_id) }}";
+
+    // Initialize counters
+    let pollCount = 0;
+    const startTime = Date.now(); // Record when polling began
+
+    function formatSeconds(ms) {
+      // Convert milliseconds to total seconds and return as “#s”
+      const seconds = Math.floor(ms / 1000);
+      return seconds + 's';
+    }
 
     function check() {
-      fetch(statusUrl)            // Sends an HTTP request to the statusUrl that returns JSON about the task status
-        .then(res => res.json())  // Once the response comes back, .json() reads it and turns it into a JavaScript object.
+      pollCount += 1; // Increment number of polls
+      const now = Date.now();
+      const elapsedMs = now - startTime; // Milliseconds since first poll
+
+      // Update the displayed counters before sending the fetch
+      document.getElementById('count').textContent = pollCount;
+      document.getElementById('elapsed').textContent = formatSeconds(elapsedMs);
+
+      fetch(statusUrl)
+        .then(res => res.json())
         .then(data => {
-          // update displayed state
+          // Update the status text
           document.getElementById('state').textContent = data.state;
+
           if (data.ready) {
-            // once complete, navigate to predict
-            window.location.href = predictUrl; // Redirect browser to the prediction page by setting window url to a new url
+            // If ready, redirect to the prediction page
+            window.location.href = predictUrl;
           } else {
-            // otherwise poll again in 2 seconds
+            // Otherwise, wait 2 seconds and poll again
             setTimeout(check, 2000);
           }
         })
         .catch(err => {
           console.error('Status check failed:', err);
-          // retry after a longer delay on error
+          // On error, retry after 5 seconds
           setTimeout(check, 5000);
         });
     }
 
-    // When the HTML page has fully loaded, start checking the task status
+    // Start polling as soon as the page loads
     document.addEventListener('DOMContentLoaded', check);
   </script>
 </body>

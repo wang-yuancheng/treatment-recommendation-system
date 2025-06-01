@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Prediction</title>
+  <meta charset="UTF-8" />
+  <title>Prediction Ready</title>
 </head>
 <body>
-    <main>
-        {% block content %}
-        Your chosen target is: {{ target }} <br>
+  <h1>Model Training Complete!</h1>
+  <p>Target: {{ target }}</p>
 
-        Your features are:
-        {% for feature in features %}
-        {{ feature }} <br>
-        {% endfor %}
+  <h2>Selected Features:</h2>
+  <ul>
+    {% for f in features %}
+      <li>{{ f }}</li>
+    {% endfor %}
+  </ul>
 
-        {% endblock %}
-    </main>
+  <p>Model file located at: <code>{{ model_path }}</code></p>
 </body>
 </html>

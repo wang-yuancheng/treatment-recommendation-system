@@ -8,6 +8,8 @@ from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV
 
+from sklearn.linear_model import LogisticRegression
+
 def load_dataset(save_path):
     return pd.read_csv(save_path)
 
@@ -72,7 +74,7 @@ def clean_and_encode_dataset(df, target):
     encoded_cont = scaler.fit_transform(healthDataRemovedOutliers[cont_cols])
     encoded_cont_cols = pd.DataFrame(encoded_cont, columns=cont_cols, index=healthDataRemovedOutliers.index)
 
-    encoder = OneHotEncoder(drop="first", sparse=False)
+    encoder = OneHotEncoder(drop="first", sparse_output=False)
     encoded_ord_array = encoder.fit_transform(healthDataRemovedOutliers[ord_cols])
     # The encoder creates N columns, so we pull out the new column names
     new_ord_columns = encoder.get_feature_names_out(ord_cols)
@@ -131,17 +133,25 @@ def hyperparameter_tuning_and_training(df, target, selected_features):
 
     return grid.best_estimator_
 
+def simple_training(df, target, selected_features):
+    X = df[selected_features]
+    y = df[target]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    clf = LogisticRegression(solver='liblinear', max_iter=100, random_state=42)
+    clf.fit(X_train, y_train)
+    return clf
+
 def run_pipeline(csv_path, target, job_id):
     df = load_dataset(csv_path)
     df, target = clean_and_encode_dataset(df, target)
     selected_features = feature_selection(df, target, threshold=0.3)
-    best_model = hyperparameter_tuning_and_training(df, target, selected_features)
-
+    # best_model = hyperparameter_tuning_and_training(df, target, selected_features)
+    best_model = simple_training(df, target, selected_features)
     auto_pipeline = Pipeline([
         ("classifier", best_model)
     ])
     model_dir = os.path.join(AUTO_MODELS_FOLDER_PATH, job_id)
     os.makedirs(model_dir, exist_ok=True)
-    path = os.path.join(model_dir, 'model.pkl')
+    path = os.path.join(str(model_dir), 'model.pkl')
     joblib.dump(auto_pipeline, path)
-    return path
+    return path, selected_features
