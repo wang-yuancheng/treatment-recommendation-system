@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Flask App{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}">
 </head>
 <body>
   <header>
@@ -12,7 +13,7 @@
   </header>
     <main>
       {% block content %}
-        <form method="POST" action="{{ url_for('base.home') }}" class="home-form">
+        <form method="POST" action="{{ url_for('base.home') }}" class="home-form" id="home-form">
           <button type="submit" name="ml" value="auto">AutoML</button>
           <button type="submit" name="ml" value="custom">CustomML</button>
         </form>
