@@ -77,28 +77,44 @@ def feature_selection(df, target, threshold) -> list:
     return selected_features, selected_features_cont, selected_features_ord
 
 def hyperparameter_tuning_and_training(X_train, y_train, y_type):
-    if y_type == "continuous":
-        model       = MLPRegressor(max_iter=200, random_state=42)
-        param_grid  = {
-            "hidden_layer_sizes": [(50,), (100,), (50, 50)],
-            "activation": ["relu", "tanh", "logistic"],
-            "solver": ["adam"],
-            "alpha": [1e-4],
-            "learning_rate": ["constant"],
-            "early_stopping": [True],
-        }
-    else:
-        model       = MLPClassifier(max_iter=200, random_state=42)
-        param_grid  = {
-            "hidden_layer_sizes": [(50,), (100,), (50, 50)],
-            "activation": ["relu", "tanh", "logistic"],
-            "solver": ["adam"],
-            "alpha": [1e-4],
-            "learning_rate": ["constant"],
-            "early_stopping": [True],
-        }
+    Model = MLPRegressor if y_type == "continuous" else MLPClassifier
+    model = Model(
+        random_state=42,
+        max_iter=400,            # give Adam room to converge
+        solver="adam",           # stick to one optimiser to keep the grid tractable
+        early_stopping=True,     # always use early-stop; we vary patience below
+    )
 
-    grid = GridSearchCV(model, param_grid, cv=5, n_jobs=-1)
+    param_grid = {
+        # network capacity / architecture
+        "hidden_layer_sizes": [(64,), (128,), (64, 32), (128, 64)],
+        "activation": ["relu", "tanh"],
+
+        # learning dynamics
+        "learning_rate_init": [1e-3, 5e-4],
+        "batch_size": [32, 64, 128],
+
+        # regularisation
+        "alpha": [1e-4, 1e-3, 1e-2],
+
+        # early-stopping “patience”
+        "n_iter_no_change": [10, 20],
+    }
+
+    # use neg_mse as gridsearch wants to maximize score
+    scoring = (
+        "neg_mean_squared_error" if y_type == "continuous" else "accuracy"
+    )
+
+    grid = GridSearchCV(
+        estimator=model,
+        param_grid=param_grid,
+        cv=5,
+        n_jobs=-1,
+        scoring=scoring,
+        verbose=1,
+    )
+
     grid.fit(X_train, y_train)
     return grid.best_estimator_
 
