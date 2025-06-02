@@ -1,13 +1,16 @@
+import pandas as pd
+import numpy as np
 from flask import Blueprint, render_template, request, url_for, redirect, flash, jsonify
 from werkzeug.utils import secure_filename
 import os, uuid
+from app.models import auto_pipeline
 from app.paths import *
 from app.model.auto_models.auto_model_train import load_dataset
 from app.utils import get_csv_path
 from app.tasks.train_tasks import train_pipeline_task
-from app.models import auto_pipeline
 from app.celery_app import celery_app
 from celery.result import AsyncResult
+from app.renamemap import rename_map
 
 # Create the Blueprint object
 auto_bp = Blueprint('auto', __name__)
@@ -90,19 +93,55 @@ def task_status(task_id):
 @auto_bp.route('/auto/<job_id>/<target>/<task_id>/predict', methods=["GET", "POST"])
 def auto_predict(job_id, target, task_id):
     res = AsyncResult(task_id, app=celery_app)
-    result = res.get()                   # {'path': path, 'selected_features': selected_features}
-    model_path = result['path']
+    result = res.get() # {'path': path, 'selected_features': selected_features}
+    renamed_target = rename_map.get(target, target)  # If target is a key in rename_map, then get returns rename_map[target]
     selected_features = result['selected_features']
-    print("Your model path:", model_path)
-    print("Your chosen features:", selected_features)
-
-    # TODO: get df_user
-    # proba = auto_pipeline.predict_proba(df_user)[0, 1]  # returns class 1: probability of disease
-    # print(f"Predicted cardiovascular risk: {proba:.3f}")
 
     return render_template('auto/predict.html',
-                           target=target,
+                           target=renamed_target,
                            features=selected_features,
-                           model_path=model_path,
-                         # result=proba
+                           job_id = job_id,
     )
+
+@auto_bp.route('/auto/result', methods=["POST"])
+def auto_result():
+    job_id = request.form['job_id']
+    selected_features = request.form.getlist('features')
+
+    variables = [
+                ('age_years', float), ('gender', int),
+                ('height_m', float), ('weight_kg', float),
+                ('systolic_bp', float), ('diastolic_bp', float),
+                ('cholesterol_level', int), ('glucose_level', int),
+                ('smoking_status', int), ('alcohol_consumption', int),
+                ('physical_activity', int), ('cardiovascular_disease', int),
+        ]
+
+    data = {}
+
+    for name, caster in variables:
+            raw = request.form.get(name)  # string or None
+            data[name] = caster(raw) if raw else None
+
+    if all(data[k] is not None for k in ('weight_kg', 'height_m')):
+            data['body_mass_index'] = data['weight_kg'] / (data['height_m'] ** 2)
+
+
+    if all(data[k] is not None for k in ('systolic_bp', 'diastolic_bp')):
+            data['mean_arterial_pressure'] = (data['systolic_bp'] + 2 * data['diastolic_bp']) / 3
+            data['pulse_pressure'] = data['systolic_bp'] - data['diastolic_bp']
+
+    # Build a new dict containing only the keys in selected_features:
+    feature_dict = {feat: data.get(feat, np.nan) for feat in selected_features}
+
+    # Then wrap that into a single-row DataFrame:
+    df_user = pd.DataFrame([feature_dict])
+
+    pipeline = auto_pipeline(job_id)
+    if hasattr(pipeline, "predict_proba"):
+        result = pipeline.predict_proba(df_user)[0, 1]  # probability
+    else:
+        result = pipeline.predict(df_user)[0]  # numeric prediction
+        print(f"Prediction: {result}")
+
+    return render_template('auto/result.html', result=result)

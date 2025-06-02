@@ -1,20 +1,258 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Prediction Ready</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Flask App{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-  <h1>Model Training Complete!</h1>
-  <p>Target: {{ target }}</p>
+  <header>
+    <h1>{% block header %}Cardiovascular Disease Prediction{% endblock %}</h1>
+  </header>
 
-  <h2>Selected Features:</h2>
-  <ul>
+  <main>
+
+    <h1>Model Training Complete!</h1>
+    <p>Target: {{ target }}</p>
+
+    <h2>Selected Features:</h2>
+    <ul>
     {% for f in features %}
       <li>{{ f }}</li>
     {% endfor %}
-  </ul>
+    </ul>
 
-  <p>Model file located at: <code>{{ model_path }}</code></p>
+    {% block content %}
+
+      <div class="sample">
+        Sample Patients:                       <br>
+        age, bmi, sbp, dbp, chol, gluc         <br>
+        30,22.5,120,80,1,1   – Low risk         <br>
+        50,28.0,130,85,2,2   – Mild risk        <br>
+        70,36.0,160,99,3,3   – High risk        <br>
+      </div>
+
+      <form method="POST" action="{{ url_for('auto.auto_result') }}" class="UserInput">
+        <input type="hidden" name="job_id" value="{{ job_id }}">
+        <input type="hidden" name="target" value="{{ renamed_target }}">
+        {% for f in features %}
+          <input type="hidden" name="features" value="{{ f }}">
+        {% endfor %}
+        <fieldset>
+          <legend>Patient Information</legend>
+
+          {# — Only show “Age” if target != "age_years" — #}
+          {% if target != 'age_years' %}
+            <fieldset class="form-group">
+              <legend>Age (0–100):</legend>
+              <div class="form-group">
+                <input
+                  type="number"
+                  id="age"
+                  name="age_years"
+                  min="0"
+                  max="100"
+                  step="1"
+                  required
+                  placeholder="e.g. 30">
+              </div>
+            </fieldset>
+          {% endif %}
+
+          {# — Only show “Gender” if target != "gender" — #}
+          {% if target != 'gender' %}
+            <fieldset class="form-group">
+              <legend>Gender</legend>
+              <div>
+                <input type="radio" id="gender_male"   name="gender" value="2" required>
+                <label for="gender_male">Male</label>
+              </div>
+              <div>
+                <input type="radio" id="gender_female" name="gender" value="1">
+                <label for="gender_female">Female</label>
+              </div>
+            </fieldset>
+          {% endif %}
+
+          {# — Only show “Height” if target != "height_m" — #}
+          {% if target != 'height_m' %}
+            <fieldset class="form-group">
+              <legend>Height (m):</legend>
+              <div>
+                <input
+                  type="number"
+                  id="height"
+                  name="height_m"
+                  min="0.5"
+                  max="2.5"
+                  step="0.01"
+                  required
+                  placeholder="e.g. 1.75">
+              </div>
+            </fieldset>
+          {% endif %}
+
+          {# — Only show “Weight” if target != "weight_kg" — #}
+          {% if target != 'weight_kg' %}
+            <fieldset class="form-group">
+              <legend>Weight (kg):</legend>
+              <div class="form-group">
+                <input
+                  type="number"
+                  id="weight"
+                  name="weight_kg"
+                  min="20"
+                  max="200"
+                  step="0.1"
+                  required
+                  placeholder="e.g. 70.5">
+              </div>
+            </fieldset>
+          {% endif %}
+
+          {# — Only show “Systolic BP” if target != "systolic_bp" — #}
+          {% if target != 'systolic_bp' %}
+            <fieldset class="form-group">
+              <legend>Systolic BP (50–250):</legend>
+              <div class="form-group">
+                <input
+                  type="number"
+                  id="sbp"
+                  name="systolic_bp"
+                  min="50"
+                  max="250"
+                  step="1"
+                  required
+                  placeholder="e.g. 120">
+              </div>
+            </fieldset>
+          {% endif %}
+
+          {# — Only show “Diastolic BP” if target != "diastolic_bp" — #}
+          {% if target != 'diastolic_bp' %}
+            <fieldset class="form-group">
+              <legend>Diastolic BP (30–150):</legend>
+              <div class="form-group">
+                <input
+                  type="number"
+                  id="dbp"
+                  name="diastolic_bp"
+                  min="30"
+                  max="150"
+                  step="1"
+                  required
+                  placeholder="e.g. 80">
+              </div>
+            </fieldset>
+          {% endif %}
+
+          {# — Only show “Cholesterol” if target != "cholesterol_level" — #}
+          {% if target != 'cholesterol_level' %}
+            <fieldset class="form-group">
+              <legend>Cholesterol</legend>
+              <div>
+                <input type="radio" id="cholesterol_normal" name="cholesterol_level" value="1" required>
+                <label for="cholesterol_normal">Normal</label>
+              </div>
+              <div>
+                <input type="radio" id="cholesterol_above" name="cholesterol_level" value="2">
+                <label for="cholesterol_above">Above Normal</label>
+              </div>
+              <div>
+                <input type="radio" id="cholesterol_high" name="cholesterol_level" value="3">
+                <label for="cholesterol_high">Well Above Normal</label>
+              </div>
+            </fieldset>
+          {% endif %}
+
+          {# — Only show “Glucose” if target != "glucose_level" — #}
+          {% if target != 'glucose_level' %}
+            <fieldset class="form-group">
+              <legend>Glucose</legend>
+              <div>
+                <input type="radio" id="glucose_normal" name="glucose_level" value="1" required>
+                <label for="glucose_normal">Normal</label>
+              </div>
+              <div>
+                <input type="radio" id="glucose_above" name="glucose_level" value="2">
+                <label for="glucose_above">Above Normal</label>
+              </div>
+              <div>
+                <input type="radio" id="glucose_high" name="glucose_level" value="3">
+                <label for="glucose_high">Well Above Normal</label>
+              </div>
+            </fieldset>
+          {% endif %}
+
+          {# — Only show “Smoker” if target != "smoking_status" — #}
+          {% if target != 'smoking_status' %}
+            <fieldset class="form-group">
+              <legend>Smoker</legend>
+              <div>
+                <input type="radio" id="smoke_yes" name="smoking_status" value="1" required>
+                <label for="smoke_yes">Yes</label>
+              </div>
+              <div>
+                <input type="radio" id="smoke_no" name="smoking_status" value="0">
+                <label for="smoke_no">No</label>
+              </div>
+            </fieldset>
+          {% endif %}
+
+          {# — Only show “Alcohol Consumption” if target != "alcohol_consumption" — #}
+          {% if target != 'alcohol_consumption' %}
+            <fieldset class="form-group">
+              <legend>Alcohol Consumption</legend>
+              <div>
+                <input type="radio" id="alcohol_yes" name="alcohol_consumption" value="1" required>
+                <label for="alcohol_yes">Yes</label>
+              </div>
+              <div>
+                <input type="radio" id="alcohol_no" name="alcohol_consumption" value="0">
+                <label for="alcohol_no">No</label>
+              </div>
+            </fieldset>
+          {% endif %}
+
+          {# — Only show “Physical Activity” if target != "physical_activity" — #}
+          {% if target != 'physical_activity' %}
+            <fieldset class="form-group">
+              <legend>Physical Activity</legend>
+              <div>
+                <input type="radio" id="active_yes" name="physical_activity" value="1" required>
+                <label for="active_yes">Yes</label>
+              </div>
+              <div>
+                <input type="radio" id="active_no" name="physical_activity" value="0">
+                <label for="active_no">No</label>
+              </div>
+            </fieldset>
+          {% endif %}
+
+          {# — Only show “Cardiovascular Disease” if target != "cardiovascular_disease" — #}
+          {% if target != 'cardiovascular_disease' %}
+            <fieldset class="form-group">
+              <legend>Cardiovascular Disease</legend>
+              <div>
+                <input type="radio" id="cardio_yes" name="cardiovascular_disease" value="1" required>
+                <label for="cardio_yes">Yes</label>
+              </div>
+              <div>
+                <input type="radio" id="cardio_no"  name="cardiovascular_disease" value="0">
+                <label for="cardio_no">No</label>
+              </div>
+            </fieldset>
+          {% endif %}
+
+          <div class="form-group">
+            <button type="submit">Submit</button>
+          </div>
+
+        </fieldset>
+      </form>
+
+    {% endblock %}
+  </main>
 </body>
 </html>
