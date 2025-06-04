@@ -5,7 +5,6 @@
 - [Exploratory Data Analysis](#exploratory-data-analysis)
 - [Feature Selection](#feature-selection)  
 - [Modelling](#modelling)  
-- [Risk Reduction Simulation](#risk-reduction-simulation)  
 
 ## Introduction
 CVD remains one of the leading causes of death worldwide. This project aims to apply the principles of data science to predict the probability of CVD based on various health indicators.
@@ -86,7 +85,7 @@ Encoded ordinal variables `cholesterol_level` `glucose_level` using one-hot enco
 Scaled continuous variables `age` `BMI` `SBP` `DBP` using MinMaxScaler
   
 ## Exploratory Data Analysis
-Below are just a few visualizations, more in-depth analysis and charts can be found in the [EDA notebook](IE0005%20Group%20Project%20Code.ipynb).
+Below are just a few main visualizations and do not represent the full picture. 
 ### Univariate Analysis
 ![Chart](assets/Count%20Plot%20for%20Cardio.png)
 ### Insights
