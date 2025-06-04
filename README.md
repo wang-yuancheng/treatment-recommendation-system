@@ -1,46 +1,33 @@
-# About \
-This repository contains code and materials for an automated end-to-end ML pipeline that predicts cardiovascular disease (CVD) risk.<br><br>
+# Automated Machine Learning Pipeline
+This repository contains code and materials for an end-to-end Flask + Celery Machine Learning application<br><br>
 Click [here](data/EDA%20and%20Model%20Comparison/README.md#data-science-workflow) to view the **data science workflow**.<br>
-Click [here](#deployment-via-flask) to view the **model deployment via Flask**.<br>
-Click [here](#end-to-end-ml-pipeline) to view the **end-to-end ML pipeline**.
+Click [here](app/README.md#model-integration-with-flask) to view the **model integration with Flask**.<br>
+Click [here](app/README.md#full-scikit-learn-pipeline) to view the **end-to-end ML pipeline**.
 
-## Highlights
+## Key Features
+| Component | Functionality | Impact |
+|------|----------------|----------------|
+| **AutoML pipeline** | Upload CSV → pick target → Celery trains and saves `model.pkl` | Keeps UI fast while training runs in the background |
+| **Async workers** | Celery + RabbitMQ + Redis handle tasks and results | Supports many users and scales easily |
+| **Custom model** | Pre-trained MLP (`custompipeline.pkl`) loaded once at startup | Fast predictions with no delay |
+| **Dynamic form** | Form fields auto-generated from selected features | Ensures input matches model’s expectations |
+| **Modular routes** | Routes split into `base/`, `custom/`, `auto/` blueprints | Cleaner code and easier to maintain |
 
-- **Automated ML Pipeline (pending)**
-  - Data validation & preprocessing  
-  - Hyperparameter tuning with Optuna (50 trials)  
-  - Final model training using best parameters  
-  - Evaluation & benchmark report (metrics, plots)  
-  - Artifact tracking & logging via MLflow  
-    
-- **Manual Deployment (pending)**
-  - Docker image build & push  
-  - Kubernetes manifests for staging & production  
-  - Local testing & performance benchmarks
- 
-- **Data Science Workflow**
-  - Data ingestion & exploration  
-  - Cleaning & preprocessing  
-  - Feature engineering & selection  
-  - Modeling & hyperparameter search  
-  - Evaluation & reporting  
+## Quick Start
+~~~bash
+# 1 Clone & install Python dependencies
+git clone git@github.com:wang-yuancheng/automated-machine-learning-pipeline.git
+cd automated-machine-learning-pipeline
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
 
-# Deployment via Flask
-- [Deployment](#deployment)  
-- [Usage](#usage)  
-- [Technologies](#technologies)
+# 2 Start infrastructure
+brew services start rabbitmq
+brew services start redis
 
-## Deployment
-### Preprocessing Pipeline
-Created a pipeline to automate the scaling + encoding + modeling
+# 3 Start a Celery worker
+celery -A app.celery_app worker --loglevel=info
 
-## Usage
-
-## Technologies
-
-
-
-# End-to-End ML pipeline
-- [NIL](#-)  
-- [NIL](#-)  
-- [NIL](#-)
+# 4 Run the Flask dev server
+python run.py                      
+~~~
