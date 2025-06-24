@@ -10,7 +10,6 @@ Click [here](app/README.md#full-scikit-learn-pipeline) to view the **end-to-end 
 | Component           | Functionality                                                  | Impact                                              |
 | ------------------- | -------------------------------------------------------------- | --------------------------------------------------- |
 | **AutoML pipeline** | Upload CSV → pick target → Celery trains and saves `model.pkl` | Keeps UI fast while training runs in the background |
-| **Async workers**   | Celery + RabbitMQ + Redis handle tasks and results             | Supports many users and scales easily               |
 | **Custom model**    | Pre-trained MLP (`custompipeline.pkl`) loaded once at startup  | Fast predictions with no delay                      |
 | **Dynamic form**    | Form fields auto-generated from selected features              | Ensures input matches model’s expectations          |
 | **Modular routes**  | Routes split into `base/`, `custom/`, `auto/` blueprints       | Cleaner code and easier to maintain                 |
